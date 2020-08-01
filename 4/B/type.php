@@ -1,59 +1,59 @@
 <?php require 'header.php';
 
-$sql = 'SELECT heroes.*,type.name as name_type from heroes INNER JOIN type ON heroes.type_id = type.id';
-$result = jalan($sql);
 
 $sqlType = 'SELECT * FROM type';
 $heroes = jalan($sqlType);
 
 
 if(isset($_POST['submit'])){
-  $target_dir = "img/";
-  $target_file = $target_dir . rand(1,100). basename($_FILES["photo"]["name"]);
-  $uploadOk = 1;
-  $imageFileType = strtolower(pathinfo($target_file,PATHINFO_EXTENSION));
-  move_uploaded_file($_FILES["photo"]["tmp_name"], $target_file);
   $name = $_POST['name'];
-  $type_id = $_POST['type_id'];
-  $sql = "INSERT INTO heroes (`name`,`type_id`,`photo`) VALUES('$name','$type_id','$target_file')";
+  $sql = "INSERT INTO type (`name`) VALUES('$name')";
   jalan($sql);
 
-  header('location: index.php');
+  header('location: type.php');
 }
 
+
+if(isset($_POST['submitEdit'])){
+    $name = $_POST['name'];
+    $sql = "UPDATE type SET name='" . $_POST['name'] . "' WHERE id=" . $_POST['id'];
+    jalan($sql);
+  
+    header('location: type.php');
+  }
+
+if(isset($_GET['hapus'])){
+    $sql = jalan('DELETE FROM type where id =' . $_GET['hapus']);
+    header('location:type.php');
+}
 
 ?>
 
 
 
 <div class="container">
-<h3>All Heroes <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+<h3>All TYPE <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
   Tambah
 </button>
 </h3>
 <div class="row">
-<?php 
-
-while($row = mysqli_fetch_assoc($result)):?>
-<div class="card mr-4 mb-4" style="width: 18rem;">
-  <img src="<?= $row['photo'] ?>" class="card-img-top" alt="...">
-  <div class="card-body">
-    <h5 class="card-title"><?= $row['name'] ?></h5>
-    <p class="card-text"><?= $row['name_type']?></p>
-    <a href="detail.php?id=<?= $row['id']?>" class="btn btn-primary">Detail</a>
-  </div>
-</div>
-<?php endwhile ?>
-</div>
-</div>
-
-
-
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <table class="table table-bordered">
+        <tr class="thead-light">
+        <th>Nama</th>
+        <th>Aksi</th>
+        </tr>
+        <?php while($data = mysqli_fetch_assoc($heroes)) :?>
+            <tr>
+            <td><?= $data['name'] ?></td>
+            <td><button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalEdit<?= $data['id']?>">
+  Edit
+</button><a href="?hapus=<?= $data['id']?>" class="btn btn-danger">Hapus</a></td>
+            </tr>
+            <div class="modal fade" id="exampleModalEdit<?= $data['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModalEdit<?= $data['id'] ?>Label" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Tambah Heroes</h5>
+        <h5 class="modal-title" id="exampleModalEdit<?= $data['id'] ?>Label">Tambah TIPE</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -61,20 +61,41 @@ while($row = mysqli_fetch_assoc($result)):?>
       <div class="modal-body">
       <form action="" method="post" enctype="multipart/form-data">
       <div class="form-group">
-        <label for="">Nama Heroes</label>
-        <input type="text" name="name" id="" class="form-control" required>
+        <label for="">Nama TIPE</label>
+        <input type="hidden" name="id" value="<?= $data['id'] ?>">
+        <input type="text" name="name" value="<?= $data['name'] ?>" id="" class="form-control" required>
       </div>
-      <div class="form-group">
-        <label for="">Photo Heroes</label>
-        <input type="file" name="photo" id="" class="form-control" required>
       </div>
-      <div class="form-group">
-        <label for="">Type</label>
-        <select name="type_id" id="" class="form-control">
-        <?php while($data = mysqli_fetch_assoc($heroes)): ?>
-          <option value="<?= $data['id']?>"><?= $data['name'] ?></option>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <input type="submit" name="submitEdit" class="btn btn-primary" value="SIMPAN"></input>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
         <?php endwhile ?>
-        </select>
+    </table>
+</div>
+</div>
+
+
+
+<div class="modal fade" id="exampleModal<?= $data['id'] ?>" tabindex="-1" role="dialog" aria-labelledby="exampleModal<?= $data['id'] ?>Label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModal<?= $data['id'] ?>Label">Tambah TIPE</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <form action="" method="post" enctype="multipart/form-data">
+      <div class="form-group">
+        <label for="">Nama TIPE</label>
+        <input type="text" name="name" id="" class="form-control" required>
       </div>
       </div>
       <div class="modal-footer">
@@ -85,6 +106,8 @@ while($row = mysqli_fetch_assoc($result)):?>
     </div>
   </div>
 </div>
+
+
 
 
 
